@@ -1,0 +1,12 @@
+name: yolov7
+channels:
+  - defaults
+dependencies:
+  - torchvision
+  - opencv
+  - pandas
+  - tqdm
+  - matplotlib
+  - seaborn
+  - scipy
+prefix: /opt/homebrew/Caskroom/miniconda/base/envs/yolov7

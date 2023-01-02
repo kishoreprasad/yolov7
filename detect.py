@@ -125,8 +125,13 @@ def detect(save_img=False):
                             f.write(('%g ' * len(line)).rstrip() % line + '\n')
 
                     if save_img or view_img:  # Add bbox to image
-                        label = f'{names[int(cls)]} {conf:.2f}'
-                        plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=1)
+                        #use cv2 to gaussian blur the bounding box area
+                        xyxy = [int(x) for x in xyxy]
+                        roi = im0[xyxy[1]:xyxy[3], xyxy[0]:xyxy[2]]
+                        roi = cv2.GaussianBlur(roi, (99, 99), 30)
+                        im0[xyxy[1]:xyxy[3], xyxy[0]:xyxy[2]] = roi
+                        # label = f'{names[int(cls)]} {conf:.2f}'
+                        # plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=1)
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
