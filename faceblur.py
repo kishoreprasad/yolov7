@@ -143,6 +143,8 @@ if __name__ == "__main__":
 
     else:
         print("executing without strides")
+        if not os.path.exists(args.output):
+            os.mkdir(args.output)
         subprocess.call(
             f"python3 {args.yolo}/detect.py --weights {args.weights}/best.pt --conf {args.conf} --source {args.source} --project {args.output}",
             shell=True
