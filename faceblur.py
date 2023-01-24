@@ -7,7 +7,6 @@ import types
 import subprocess
 from os.path import join
 import tqdm
-# from PIL import pillow
 import PIL as pillow
 
 ST_RES = 1440

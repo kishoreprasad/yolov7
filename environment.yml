@@ -1,12 +1,65 @@
 name: yolov7
 channels:
   - defaults
+  - conda-forge
 dependencies:
-  - torchvision
-  - opencv
   - pandas
-  - tqdm
+  - opencv
   - matplotlib
+  - torchvision
   - seaborn
+  - tqdm
   - scipy
+  - traitlets
+  - python-dateutil
+  - ipython
+  - stack_data
+  - python=3.10
+  - zlib
+  - parso
+  - six
+  - wcwidth
+  - libffi
+  - tzdata
+  - nest-asyncio
+  - debugpy
+  - pygments
+  - tornado
+  - executing
+  - pexpect
+  - matplotlib-inline
+  - platformdirs
+  - readline
+  - jupyter_client
+  - comm
+  - setuptools
+  - backcall
+  - xz
+  - prompt-toolkit
+  - decorator
+  - ncurses
+  - wheel
+  - pure_eval
+  - packaging
+  - libsodium
+  - jupyter_core
+  - appnope
+  - psutil
+  - ptyprocess
+  - bzip2
+  - openssl
+  - tk
+  - certifi
+  - libcxx
+  - pip
+  - zeromq
+  - entrypoints
+  - ca-certificates
+  - pickleshare
+  - pyzmq
+  - jedi
+  - sqlite
+  - asttokens
+  - ipykernel
+  - pillow
 prefix: /opt/homebrew/Caskroom/miniconda/base/envs/yolov7
