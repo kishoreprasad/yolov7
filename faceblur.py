@@ -1,3 +1,17 @@
+"""
+This script takes an image as input and blurs the faces in the image.
+Calls the detect.py file from the YOLOv7 repository to detect and blur the faces.
+Uses the best.pt weights file Trained.
+There are two options to blur the faces:
+1. By splitting the image into strides and then merging them back together
+2. By running the model on the whole image
+Author: Kishore Prasad
+Usage:
+    python3 faceblur.py --strides --weights <path to weights file> --source <path to source> --output <path to output> --yolo <path to yolo> --conf <confidence threshold>
+    OR
+    python3 faceblur.py --weights <path to weights file> --source <path to source> --output <path to output> --yolo <path to yolo> --conf <confidence threshold>
+Repo: https://github.com/kishoreprasad/yolov7.git
+"""
 import cv2
 import argparse
 import numpy as np
