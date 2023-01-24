@@ -1,7 +1,7 @@
 import argparse
 import time
 from pathlib import Path
-
+import tqdm
 import cv2
 import torch
 import torch.backends.cudnn as cudnn
@@ -14,7 +14,6 @@ from utils.general import check_img_size, check_requirements, check_imshow, non_
 from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized, TracedModel
 
-
 def detect(save_img=False):
     source, weights, view_img, save_txt, imgsz, trace = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size, not opt.no_trace
     save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
@@ -22,8 +21,13 @@ def detect(save_img=False):
         ('rtsp://', 'rtmp://', 'http://', 'https://'))
 
     # Directories
-    save_dir = Path(increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok))  # increment run
-    (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
+    if opt.project == 'runs/detect' or opt.name:
+        opt.project = str(increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok))
+        (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)
+    else:
+        save_dir=Path(opt.project) / opt.name
+    # save_dir = Path(increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok))  # increment run
+    # (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
 
     # Initialize
     set_logging()
@@ -33,7 +37,11 @@ def detect(save_img=False):
     # Load model
     model = attempt_load(weights, map_location=device)  # load FP32 model
     stride = int(model.stride.max())  # model stride
+    #set stride to 32
+    # stride = 128
+    # print("stride: ", stride)
     imgsz = check_img_size(imgsz, s=stride)  # check img_size
+
 
     if trace:
         model = TracedModel(model, device, opt.img_size)
@@ -65,9 +73,11 @@ def detect(save_img=False):
         model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
     old_img_w = old_img_h = imgsz
     old_img_b = 1
-
+    p_bar = tqdm.tqdm(range(len(dataset)), desc='Processing', leave=False)
     t0 = time.time()
     for path, img, im0s, vid_cap in dataset:
+        p_bar.set_description(f'Processing {path}: ')
+        p_bar.update(1)
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
@@ -125,10 +135,13 @@ def detect(save_img=False):
                             f.write(('%g ' * len(line)).rstrip() % line + '\n')
 
                     if save_img or view_img:  # Add bbox to image
+                        #if the xyxy is more than a certain threshold of the image size, then skip it
+                        if (xyxy[2] - xyxy[0]) > (im0.shape[1] * opt.thres) or (xyxy[3] - xyxy[1]) > (im0.shape[0] * opt.thres):
+                            continue   #skip this bounding box
                         #use cv2 to gaussian blur the bounding box area
                         xyxy = [int(x) for x in xyxy]
                         roi = im0[xyxy[1]:xyxy[3], xyxy[0]:xyxy[2]]
-                        roi = cv2.GaussianBlur(roi, (99, 99), 30)
+                        roi = cv2.GaussianBlur(roi, (99, 99), 5)
                         im0[xyxy[1]:xyxy[3], xyxy[0]:xyxy[2]] = roi
                         # label = f'{names[int(cls)]} {conf:.2f}'
                         # plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=1)
@@ -185,13 +198,14 @@ if __name__ == '__main__':
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--update', action='store_true', help='update all models')
     parser.add_argument('--project', default='runs/detect', help='save results to project/name')
-    parser.add_argument('--name', default='exp', help='save results to project/name')
+    parser.add_argument('--name', default='', help='save results to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     parser.add_argument('--no-trace', action='store_true', help='don`t trace model')
+    #add a parse argument for blur threshold
+    parser.add_argument('--thres', type=float, default=0.3, help='blur threshold')
     opt = parser.parse_args()
     print(opt)
     #check_requirements(exclude=('pycocotools', 'thop'))
-
     with torch.no_grad():
         if opt.update:  # update all models (to fix SourceChangeWarning)
             for opt.weights in ['yolov7.pt']:
