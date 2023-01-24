@@ -16,4 +16,6 @@
 
 8\. $ conda activate yolov7
 
-9\. $ python detect.py --weights best.pt --conf 0.5 --source "Location of source folder/file"
+9\. $ python faceblur.py -s "Location of the source Folder" -o "Location of the output folder" -y "Location of the yolo repository"
+
+10\. Run $ python faceblur.py --help for more information
